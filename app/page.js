@@ -1,27 +1,39 @@
-import Navbar from "./components/Navbar";
+import Image from "next/image"
+import Link from "next/link"
 
 export default function Home() {
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen flex flex-col items-center justify-center text-center px-6">
-        <h1 className="text-6xl font-bold">NEETHI</h1>
+    <div className="flex items-center justify-center h-screen bg-black text-white">
 
-        <p className="mt-6 text-gray-400 max-w-2xl">
-          AI-Powered Legal Awareness Platform designed to simplify Indian
-          legal knowledge and connect citizens with verified lawyers.
-        </p>
+      <div className="flex items-center gap-12">
 
-        <div className="mt-10 space-x-4">
-          <button className="px-6 py-3 bg-white text-black rounded-lg">
-            Ask Legal Question
-          </button>
+        <Image
+          src="/neethi-logo.svg"
+          width={260}
+          height={260}
+          alt="Neethi Logo"
+        />
 
-          <button className="px-6 py-3 border border-white rounded-lg">
-            Find a Lawyer
-          </button>
+        <div>
+
+          <h1 className="text-6xl font-serif font-bold">
+            NEETHI
+          </h1>
+
+          <p className="text-gray-300 mt-2 tracking-widest">
+            WHERE LAW MEETS TECHNOLOGY
+          </p>
+
+          <Link href="/role">
+            <button className="mt-8 px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-800 transition">
+              GET STARTED →
+            </button>
+          </Link>
+
         </div>
-      </main>
-    </>
-  );
+
+      </div>
+
+    </div>
+  )
 }
