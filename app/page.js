@@ -1,45 +1,39 @@
-"use client";
-import { useState } from "react";
-import Navbar from "./components/Navbar";
+import Image from "next/image"
+import Link from "next/link"
 
-export default function Chat() {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState("");
+export default function Home() {
+  return (
+    <div className="flex items-center justify-center h-screen bg-black text-white">
 
-    const sendMessage = () => {
-        if (!input) return;
-        setMessages([...messages, { text: input, sender: "user" }]);
-        setInput("");
-    };
+      <div className="flex items-center gap-12">
 
-    return (
-        <>
-            <Navbar />
-            <div className="p-10 max-w-3xl mx-auto">
-                <div className="bg-neutral-900 h-96 overflow-y-auto p-4 rounded-lg border border-white/20">
-                    {messages.map((msg, index) => (
-                        <div key={index} className="mb-3 text-white">
-                            {msg.text}
-                        </div>
-                    ))}
-                </div>
+        <Image
+          src="/neethi-logo.svg"
+          width={260}
+          height={260}
+          alt="Neethi Logo"
+        />
 
-                <div className="flex mt-4">
-                    <input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        className="flex-1 p-3 bg-black border border-white/20 rounded-l"
-                        placeholder="Ask your legal question..."
-                    />
+        <div>
 
-                    <button
-                        onClick={sendMessage}
-                        className="px-6 bg-white text-black rounded-r"
-                    >
-                        Send
-                    </button>
-                </div>
-            </div>
-        </>
-    );
+          <h1 className="text-6xl font-serif font-bold">
+            NEETHI
+          </h1>
+
+          <p className="text-gray-300 mt-2 tracking-widest">
+            WHERE LAW MEETS TECHNOLOGY
+          </p>
+
+          <Link href="/role">
+            <button className="mt-8 px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-800 transition">
+              GET STARTED →
+            </button>
+          </Link>
+
+        </div>
+
+      </div>
+
+    </div>
+  )
 }
