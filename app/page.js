@@ -1,27 +1,45 @@
+"use client";
+import { useState } from "react";
 import Navbar from "./components/Navbar";
 
-export default function Home() {
-  return (
-    <>
-      <Navbar />
-      <main className="min-h-screen flex flex-col items-center justify-center text-center px-6">
-        <h1 className="text-6xl font-bold">NEETHI</h1>
+export default function Chat() {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState("");
 
-        <p className="mt-6 text-gray-400 max-w-2xl">
-          AI-Powered Legal Awareness Platform designed to simplify Indian
-          legal knowledge and connect citizens with verified lawyers.
-        </p>
+    const sendMessage = () => {
+        if (!input) return;
+        setMessages([...messages, { text: input, sender: "user" }]);
+        setInput("");
+    };
 
-        <div className="mt-10 space-x-4">
-          <button className="px-6 py-3 bg-white text-black rounded-lg">
-            Ask Legal Question
-          </button>
+    return (
+        <>
+            <Navbar />
+            <div className="p-10 max-w-3xl mx-auto">
+                <div className="bg-neutral-900 h-96 overflow-y-auto p-4 rounded-lg border border-white/20">
+                    {messages.map((msg, index) => (
+                        <div key={index} className="mb-3 text-white">
+                            {msg.text}
+                        </div>
+                    ))}
+                </div>
 
-          <button className="px-6 py-3 border border-white rounded-lg">
-            Find a Lawyer
-          </button>
-        </div>
-      </main>
-    </>
-  );
+                <div className="flex mt-4">
+                    <input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        className="flex-1 p-3 bg-black border border-white/20 rounded-l"
+                        placeholder="Ask your legal question..."
+                    />
+
+                    <button
+                        onClick={sendMessage}
+                        className="px-6 bg-white text-black rounded-r"
+                    >
+                        Send
+                    </button>
+                </div>
+            </div>
+        </>
+    );
 }
