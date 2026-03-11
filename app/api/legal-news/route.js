@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 const MAX_ARTICLES = 10;
+const API_KEY = "6ed8d242ba897f34c59f2c07a5fb3510";
 
 function formatTime(dateString) {
     const date = new Date(dateString);
@@ -17,10 +18,8 @@ function formatTime(dateString) {
 export async function GET() {
     try {
 
-        const apiKey = process.env.GNEWS_API_KEY;
-
         const url =
-            `https://gnews.io/api/v4/search?q=law OR court OR "supreme court" OR "high court"&lang=en&country=in&max=${MAX_ARTICLES}&apikey=${apiKey}`;
+            `https://gnews.io/api/v4/search?q=law OR court OR "supreme court" OR "high court"&lang=en&country=in&max=${MAX_ARTICLES}&apikey=${API_KEY}`;
 
         const res = await fetch(url, {
             cache: "no-store"
