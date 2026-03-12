@@ -25,23 +25,37 @@ function ChatSection() {
     { text: "Hello! I'm your AI legal assistant. Ask me anything about Indian law.", sender: 'bot' }
   ]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    setMessages(prev => [...prev, { text: input, sender: 'user' }]);
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+    const question = input.trim();
+    setMessages(prev => [...prev, { text: question, sender: 'user' }]);
     setInput('');
-    setTimeout(() => {
+    setLoading(true);
+
+    try {
+      const res = await fetch('http://127.0.0.1:8000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev, { text: data.answer, sender: 'bot' }]);
+    } catch {
       setMessages(prev => [...prev, {
-        text: "I'm processing your legal query. Please consult a qualified lawyer for professional advice.",
+        text: '⚠️ AI server not reachable. Please make sure the backend is running.',
         sender: 'bot'
       }]);
-    }, 800);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, loading]);
 
   return (
     <div className="flex flex-col h-[70vh] max-w-3xl mx-auto w-full">
@@ -57,6 +71,13 @@ function ChatSection() {
             </div>
           </div>
         ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-white/10 border border-white/10 rounded-2xl rounded-tl-none px-5 py-3 text-sm text-gray-400 flex items-center gap-2">
+              <span className="animate-pulse">AI is thinking…</span>
+            </div>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
       <div className="flex gap-3 mt-4">
@@ -64,12 +85,14 @@ function ChatSection() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && sendMessage()}
-          className="flex-1 bg-white/5 border border-white/15 rounded-xl px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition"
+          disabled={loading}
+          className="flex-1 bg-white/5 border border-white/15 rounded-xl px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition disabled:opacity-50"
           placeholder="Ask your legal question..."
         />
         <button
           onClick={sendMessage}
-          className="px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition"
+          disabled={loading}
+          className="px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Send
         </button>

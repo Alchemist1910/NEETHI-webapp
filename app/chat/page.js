@@ -1,45 +1,129 @@
 "use client";
+
 import { useState } from "react";
-import Navbar from "../components/Navbar";
 
-export default function Chat() {
-    const [messages, setMessages] = useState([]);
+export default function ChatPage() {
+
+    const [messages, setMessages] = useState([
+        {
+            role: "assistant",
+            content: "Hello! I'm your AI legal assistant. Ask me anything about Indian law."
+        }
+    ]);
+
     const [input, setInput] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const sendMessage = () => {
-        if (!input) return;
-        setMessages([...messages, { text: input, sender: "user" }]);
+    async function sendMessage() {
+
+        if (!input.trim()) return;
+
+        const question = input.trim();
+
+        setMessages(prev => [
+            ...prev,
+            { role: "user", content: question }
+        ]);
+
         setInput("");
-    };
+        setLoading(true);
+
+        try {
+
+            const response = await fetch("http://127.0.0.1:8000/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    question: question
+                })
+            });
+
+            const data = await response.json();
+
+            setMessages(prev => [
+                ...prev,
+                {
+                    role: "assistant",
+                    content: data.answer
+                }
+            ]);
+
+        } catch (error) {
+
+            console.error(error);
+
+            setMessages(prev => [
+                ...prev,
+                {
+                    role: "assistant",
+                    content: "⚠️ AI server not reachable."
+                }
+            ]);
+
+        }
+
+        setLoading(false);
+    }
+
+    function handleKeyDown(e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    }
 
     return (
-        <>
-            <Navbar />
-            <div className="p-10 max-w-3xl mx-auto">
-                <div className="bg-neutral-900 h-96 overflow-y-auto p-4 rounded-lg border border-white/20">
-                    {messages.map((msg, index) => (
-                        <div key={index} className="mb-3 text-white">
-                            {msg.text}
-                        </div>
-                    ))}
-                </div>
 
-                <div className="flex mt-4">
-                    <input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        className="flex-1 p-3 bg-black border border-white/20 rounded-l"
-                        placeholder="Ask your legal question..."
-                    />
+        <div style={{ padding: "40px", fontFamily: "Arial" }}>
 
-                    <button
-                        onClick={sendMessage}
-                        className="px-6 bg-white text-black rounded-r"
+            <h1>AI Legal Chat</h1>
+
+            <div
+                style={{
+                    border: "1px solid #ccc",
+                    height: "400px",
+                    overflowY: "auto",
+                    padding: "20px",
+                    marginBottom: "20px"
+                }}
+            >
+
+                {messages.map((msg, i) => (
+                    <div
+                        key={i}
+                        style={{
+                            textAlign: msg.role === "user" ? "right" : "left",
+                            marginBottom: "10px"
+                        }}
                     >
-                        Send
-                    </button>
-                </div>
+                        <b>{msg.role === "user" ? "You" : "AI"}:</b> {msg.content}
+                    </div>
+                ))}
+
+                {loading && <p>AI is thinking...</p>}
+
             </div>
-        </>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+
+                <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask a legal question..."
+                    style={{ flex: 1, padding: "10px" }}
+                />
+
+                <button
+                    onClick={sendMessage}
+                    style={{ padding: "10px 20px" }}
+                >
+                    Send
+                </button>
+
+            </div>
+
+        </div>
     );
 }
