@@ -40,7 +40,9 @@ function ChatSection() {
   };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 1) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   return (
@@ -88,7 +90,7 @@ function LawyersSection() {
       const list = [];
       snap.forEach(doc => {
         const d = doc.data();
-        if (d.lawyerid && d.lawyerid.trim() !== '') list.push({ id: doc.id, ...d });
+        if (d.role === 'lawyer' || (d.lawyerid && d.lawyerid.trim() !== '')) list.push({ id: doc.id, ...d });
       });
       setLawyers(list);
       setLoading(false);
@@ -113,7 +115,7 @@ function LawyersSection() {
           <div className="bg-[#e2e4b1] h-56 w-full flex justify-center items-end overflow-hidden">
             <div className="w-56 h-56 z-10 relative">
               <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${lawyer.uid || lawyer.name}&backgroundColor=transparent`}
+                src={`https://randomuser.me/api/portraits/${lawyer.gender === 'female' ? 'women' : 'men'}/${(lawyer.uid ? lawyer.uid.charCodeAt(lawyer.uid.length - 1) || 0 : 0) % 100}.jpg`}
                 alt={lawyer.name || 'Lawyer'}
                 className="w-full h-full object-cover object-bottom"
               />
@@ -122,7 +124,8 @@ function LawyersSection() {
           <div className="bg-[#2a2a2a] pt-6 pb-6 px-6 flex-grow flex flex-col">
             <h3 className="text-xl font-bold text-white mb-2">Adv. {lawyer.name || 'Unknown'}</h3>
             <div className="space-y-1 mt-1 mb-8 text-sm text-gray-200">
-              <p>Languages: English, Hindi</p>
+              <p>Languages: {lawyer.languages || 'English, Hindi'}</p>
+              {lawyer.experience && <p>Experience: {lawyer.experience}</p>}
               <p className="line-clamp-1">Location: {lawyer.officeAddress || 'Not specified'}</p>
               <p>ID: {lawyer.lawyerid}</p>
             </div>
