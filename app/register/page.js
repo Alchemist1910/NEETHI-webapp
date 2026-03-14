@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "../components/Navbar";
@@ -13,12 +13,23 @@ export default function Register() {
 
     const router = useRouter();
 
+    const [isLawyer, setIsLawyer] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            setIsLawyer(params.get("role") === "lawyer");
+        }
+    }, []);
+
     const [formData, setFormData] = useState({
-        username: "",
         fullName: "",
         email: "",
+        gender: "",
         lawyerId: "",
         officeAddress: "",
+        languages: "",
+        experience: "",
         password: "",
         confirmPassword: ""
     });
@@ -47,14 +58,22 @@ export default function Register() {
             const user = userCredential.user;
 
             // store user data
-            await addDoc(collection(db, "users"), {
+            const userData = {
                 uid: user.uid,
-                username: formData.username,
                 name: formData.fullName,
                 email: formData.email,
-                lawyerid: formData.lawyerId,
-                officeAddress: formData.officeAddress
-            });
+                gender: formData.gender,
+                role: isLawyer ? "lawyer" : "user",
+            };
+
+            if (isLawyer) {
+                userData.lawyerid = formData.lawyerId;
+                userData.officeAddress = formData.officeAddress;
+                userData.languages = formData.languages;
+                userData.experience = formData.experience;
+            }
+
+            await addDoc(collection(db, "users"), userData);
 
             alert("Registration Successful");
 
@@ -105,16 +124,6 @@ export default function Register() {
 
                                 <input
                                     type="text"
-                                    name="username"
-                                    placeholder="Username"
-                                    required
-                                    value={formData.username}
-                                    onChange={handleChange}
-                                    className="w-full p-4 bg-[#1a1a1a] border border-white/10 rounded-lg"
-                                />
-
-                                <input
-                                    type="text"
                                     name="fullName"
                                     placeholder="Full Name"
                                     required
@@ -133,10 +142,23 @@ export default function Register() {
                                     className="w-full p-4 bg-[#1a1a1a] border border-white/10 rounded-lg"
                                 />
 
+                                <select
+                                    name="gender"
+                                    required
+                                    value={formData.gender}
+                                    onChange={handleChange}
+                                    className="w-full p-4 bg-[#1a1a1a] border border-white/10 rounded-lg text-gray-400 focus:text-white"
+                                >
+                                    <option value="" disabled>Select Gender *</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+
                                 <input
                                     type="text"
                                     name="lawyerId"
-                                    placeholder="Lawyer ID (Optional)"
+                                    placeholder={isLawyer ? "Lawyer ID *" : "Lawyer ID (Optional)"}
+                                    required={isLawyer}
                                     value={formData.lawyerId}
                                     onChange={handleChange}
                                     className="w-full p-4 bg-[#1a1a1a] border border-white/10 rounded-lg"
@@ -150,6 +172,28 @@ export default function Register() {
                                     onChange={handleChange}
                                     className="w-full p-4 bg-[#1a1a1a] border border-white/10 rounded-lg"
                                 />
+
+                                {isLawyer && (
+                                    <>
+                                        <input
+                                            type="text"
+                                            name="languages"
+                                            placeholder="Languages Known (e.g., English, Hindi, Malayalam)"
+                                            value={formData.languages}
+                                            onChange={handleChange}
+                                            className="w-full p-4 bg-[#1a1a1a] border border-white/10 rounded-lg"
+                                        />
+        
+                                        <input
+                                            type="text"
+                                            name="experience"
+                                            placeholder="Years of Experience (e.g., 5 Years)"
+                                            value={formData.experience}
+                                            onChange={handleChange}
+                                            className="w-full p-4 bg-[#1a1a1a] border border-white/10 rounded-lg"
+                                        />
+                                    </>
+                                )}
 
                                 <input
                                     type="password"
