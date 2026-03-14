@@ -103,7 +103,7 @@ export default function Register() {
                         </h1>
 
                         <Image
-                            src="/neethi-logo.svg"
+                            src="/image-removebg-preview.png"
                             width={300}
                             height={300}
                             alt="Neethi Logo"
