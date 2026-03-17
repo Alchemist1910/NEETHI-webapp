@@ -1,41 +1,72 @@
+import os
+from dotenv import load_dotenv
+
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import Ollama
-from langchain_classic.chains import RetrievalQA
+from langchain_groq import ChatGroq
 
 
-# Load embedding model
+# Load env
+load_dotenv()
+api_key = os.getenv("GROQ_API_KEY")
+
+
+# Embeddings
 embedding = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
-# Load Chroma vector database
+# Vector DB
 db = Chroma(
     persist_directory="chroma_db",
     embedding_function=embedding
 )
 
-# Create retriever
-retriever = db.as_retriever(search_kwargs={"k": 3})
+retriever = db.as_retriever(search_kwargs={"k": 4})
 
-# Load Phi3 from Ollama
-llm = Ollama(
-    model="phi3",
-    temperature=0.2
+
+# Groq LLM (low temp = accurate)
+llm = ChatGroq(
+    model="llama-3.1-8b-instant",
+    api_key=api_key,
+    temperature=0.1
 )
 
-# Create RAG chain
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=retriever,
-    chain_type="stuff"
-)
 
-# Function used by FastAPI
+# ✅ SIMPLE + CLEAN OUTPUT FUNCTION
 def ask_rag(question: str):
 
-    result = qa_chain.invoke({
-        "query": question
-    })
+    try:
+        # Get relevant docs
+        docs = retriever.invoke(question)
 
-    return result["result"]
+        context = "\n\n".join([doc.page_content for doc in docs])
+
+        # 🔥 SIMPLE PROMPT (short + clear)
+        prompt = f"""
+You are a legal assistant.
+
+Answer in a very simple and short way.
+
+Rules:
+- Max 4 lines
+- Use bullet points
+- No long paragraphs
+- Be clear and direct
+
+Context:
+{context}
+
+Question:
+{question}
+
+Answer:
+"""
+
+        response = llm.invoke(prompt)
+
+        return response.content.strip()
+
+    except Exception as e:
+        print("ERROR:", e)
+        return "⚠️ Error generating answer"
