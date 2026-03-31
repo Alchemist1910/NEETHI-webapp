@@ -12,26 +12,14 @@ export default function Lawyers() {
 
     useEffect(() => {
 
+        // Read only from the dedicated 'lawyers' collection — regular users never appear here
         const unsubscribe = onSnapshot(
-            collection(db, "users"),
+            collection(db, "lawyers"),
             (snapshot) => {
 
-                const lawyersList = [];
-
-                snapshot.forEach((doc) => {
-
-                    const data = doc.data();
-
-                    if (data.role === "lawyer" || (data.lawyerid && data.lawyerid.trim() !== "")) {
-
-                        lawyersList.push({
-                            id: doc.id,
-                            ...data
-                        });
-
-                    }
-
-                });
+                const lawyersList = snapshot.docs
+                    .map((doc) => ({ id: doc.id, ...doc.data() }))
+                    .filter((d) => d.role === "lawyer");
 
                 setLawyers(lawyersList);
                 setLoading(false);

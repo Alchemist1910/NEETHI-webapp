@@ -109,12 +109,10 @@ function LawyersSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'users'), snap => {
-      const list = [];
-      snap.forEach(doc => {
-        const d = doc.data();
-        if (d.role === 'lawyer' || (d.lawyerid && d.lawyerid.trim() !== '')) list.push({ id: doc.id, ...d });
-      });
+    const unsub = onSnapshot(collection(db, 'lawyers'), snap => {
+      const list = snap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(d => d.role === 'lawyer');
       setLawyers(list);
       setLoading(false);
     }, () => setLoading(false));
